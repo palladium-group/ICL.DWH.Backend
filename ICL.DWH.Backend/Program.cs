@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        policy.WithOrigins("https://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+        policy.WithOrigins("https://icl-central.azurewebsites.net").AllowAnyHeader().AllowAnyMethod();
     });
 });
 builder.Host.UseSerilog((ctx, lc) => lc
