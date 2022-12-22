@@ -26,11 +26,15 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5014"));
+    .WriteTo.Console());
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+} 
+else
 {
     app.UseSwagger();
     app.UseSwaggerUI();
