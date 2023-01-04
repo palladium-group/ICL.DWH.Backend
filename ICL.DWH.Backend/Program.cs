@@ -3,10 +3,12 @@ using ICL.DWH.Backend.Core;
 using ICL.DWH.Backend.Core.Repository;
 using ICL.DWH.Backend.Core.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+string[] _allowedOrigins;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -18,11 +20,12 @@ builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+_allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        policy.WithOrigins("https://icl-central.azurewebsites.net").AllowAnyHeader().AllowAnyMethod();
+        policy.WithOrigins(_allowedOrigins).AllowAnyHeader().AllowAnyMethod();
     });
 });
 builder.Host.UseSerilog((ctx, lc) => lc
