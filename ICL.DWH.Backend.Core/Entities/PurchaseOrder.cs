@@ -15,5 +15,14 @@ namespace ICL.DWH.Backend.Core.Entities
         public DateTime BookingDate { get; set; }
         public Guid? SCMID { get; set; }
         public string? AsnFile { get; set; }
+        public PurchaseOrderStatus Status { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+
+    public enum PurchaseOrderStatus
+    {
+        Pending,
+        Delivered,
+        Failed
     }
 }

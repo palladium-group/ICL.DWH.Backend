@@ -12,5 +12,6 @@ namespace ICL.DWH.Backend.Core.Services
         PurchaseOrder NewPurchaseOrder(PurchaseOrder purchaseOrder);
         IEnumerable<PurchaseOrder> GetPurchaseOrders();
         void UpdatePurchaseOrderByScmId(string bookingId, Guid scmId);
+        void UpdatePurchaseOrderAsFailed(string bookingId, string errorMessage);
     }
 }
