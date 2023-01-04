@@ -40,6 +40,24 @@ namespace ICL.DWH.Backend.Core.Services
             }
         }
 
+        public void UpdatePurchaseOrderAsFailed(string bookingId, string errorMessage)
+        {
+            try
+            {
+                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.Status == PurchaseOrderStatus.Pending).FirstOrDefault();
+                if (purchaseOrder != null)
+                {
+                    purchaseOrder.Status = PurchaseOrderStatus.Failed;
+                    purchaseOrder.ErrorMessage = errorMessage;
+                    _purchaseOrderRepository.Update(purchaseOrder);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
         public void UpdatePurchaseOrderByScmId(string bookingId, Guid scmId)
         {
             try
@@ -48,13 +66,13 @@ namespace ICL.DWH.Backend.Core.Services
                 if (purchaseOrder != null)
                 {
                     purchaseOrder.SCMID = scmId;
+                    purchaseOrder.Status = PurchaseOrderStatus.Delivered;
                     _purchaseOrderRepository.Update(purchaseOrder);
                 }
             }
             catch (Exception e)
             {
-
-                throw;
+                throw e;
             }
         }
     }

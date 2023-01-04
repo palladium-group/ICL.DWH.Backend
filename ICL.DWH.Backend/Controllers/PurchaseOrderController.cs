@@ -56,5 +56,19 @@ namespace ICL.DWH.Backend.Controllers
                 throw;
             }
         }
+
+        [HttpGet("UpdatePurchaseOrderAsFailed/{bookingNo}/{errorMessage}")]
+        public IActionResult UpdatePurchaseOrderAsFailed(string bookingNo, string errorMessage)
+        {
+            try
+            {
+                _purchaseOrderService.UpdatePurchaseOrderAsFailed(bookingNo, errorMessage);
+                return Ok(new { message = "Updated successfully" });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
