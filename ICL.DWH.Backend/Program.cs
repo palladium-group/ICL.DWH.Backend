@@ -51,10 +51,10 @@ app.MapGet("/", () => "Hello World!");
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 app.MapControllers();
-//EnsureMigration.EnsureMigrationOfContext<DataContext>(app);
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-    db.Database.Migrate();
-}
+EnsureMigration.EnsureMigrationOfContext<DataContext>(app);
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+//    db.Database.Migrate();
+//}
 app.Run();
