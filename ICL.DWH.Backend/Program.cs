@@ -51,5 +51,5 @@ app.MapGet("/", () => "Hello World!");
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 app.MapControllers();
-EnsureMigration.EnsureMigrationOfContext<DataContext>(app);
+//EnsureMigration.EnsureMigrationOfContext<DataContext>(app);
 app.Run();
