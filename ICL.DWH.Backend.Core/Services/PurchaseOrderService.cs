@@ -40,7 +40,7 @@ namespace ICL.DWH.Backend.Core.Services
             }
         }
 
-        public void UpdatePurchaseOrderAsFailed(string bookingId, string errorMessage)
+        public void UpdatePurchaseOrderAsFailed(string bookingId)
         {
             try
             {
@@ -48,7 +48,6 @@ namespace ICL.DWH.Backend.Core.Services
                 if (purchaseOrder != null)
                 {
                     purchaseOrder.Status = PurchaseOrderStatus.Failed;
-                    purchaseOrder.ErrorMessage = errorMessage;
                     _purchaseOrderRepository.Update(purchaseOrder);
                 }
             }
