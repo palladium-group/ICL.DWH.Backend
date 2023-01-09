@@ -58,11 +58,11 @@ namespace ICL.DWH.Backend.Controllers
         }
 
         [HttpGet("UpdatePurchaseOrderAsFailed/{bookingNo}")]
-        public IActionResult UpdatePurchaseOrderAsFailed(string bookingNo)
+        public IActionResult UpdatePurchaseOrderAsFailed(string bookingNo, [FromBody] ErrorMessage errorMessage)
         {
             try
             {
-                _purchaseOrderService.UpdatePurchaseOrderAsFailed(bookingNo);
+                _purchaseOrderService.UpdatePurchaseOrderAsFailed(bookingNo, errorMessage.Message);
                 return Ok(new { message = "Updated successfully" });
             }
             catch (Exception)
@@ -70,5 +70,10 @@ namespace ICL.DWH.Backend.Controllers
                 throw;
             }
         }
+    }
+
+    public class ErrorMessage
+    {
+        public string Message { get; set; }
     }
 }
