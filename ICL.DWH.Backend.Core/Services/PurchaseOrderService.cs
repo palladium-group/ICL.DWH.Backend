@@ -75,5 +75,32 @@ namespace ICL.DWH.Backend.Core.Services
                 throw e;
             }
         }
+
+        public string ValidatePurchaseOrder(string bookingId)
+        {
+            try
+            {
+                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.Status == PurchaseOrderStatus.Pending).FirstOrDefault();
+                if (purchaseOrder != null)
+                {
+                    if (purchaseOrder.BookingDate != null && purchaseOrder.BookingNo != null && purchaseOrder.products.Count > 0)
+                    {
+                        return "valid";
+                    }
+                    else
+                    {
+                        return "not valid";
+                    }
+                }
+                else
+                {
+                    return "not valid";
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
     }
 }
