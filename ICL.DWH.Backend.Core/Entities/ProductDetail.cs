@@ -17,5 +17,6 @@ namespace ICL.DWH.Backend.Core.Entities
         public string? trade_item_category { get; set; }
         public string? trade_item_product { get; set; }
         public string? program_area { get; set; }
+        public string? trade_item_product_gs1 { get; set; }
     }
 }

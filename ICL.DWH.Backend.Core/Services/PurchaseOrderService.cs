@@ -68,10 +68,10 @@ namespace ICL.DWH.Backend.Core.Services
         {
             try
             {
-                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.Status == PurchaseOrderStatus.Pending).FirstOrDefault();
+                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.DeliveryStatus == PurchaseOrderStatus.Pending).FirstOrDefault();
                 if (purchaseOrder != null)
                 {
-                    purchaseOrder.Status = PurchaseOrderStatus.Failed;
+                    purchaseOrder.DeliveryStatus = PurchaseOrderStatus.Failed;
                     purchaseOrder.ErrorMessage = errorMessage;
                     _purchaseOrderRepository.Update(purchaseOrder);
                 }
@@ -90,7 +90,7 @@ namespace ICL.DWH.Backend.Core.Services
                 if (purchaseOrder != null)
                 {
                     purchaseOrder.SCMID = scmId;
-                    purchaseOrder.Status = PurchaseOrderStatus.Delivered;
+                    purchaseOrder.DeliveryStatus = PurchaseOrderStatus.Delivered;
                     _purchaseOrderRepository.Update(purchaseOrder);
                 }
             }

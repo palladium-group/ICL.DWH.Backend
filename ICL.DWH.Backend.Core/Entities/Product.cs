@@ -26,6 +26,7 @@ namespace ICL.DWH.Backend.Core.Entities
         public string? TradeItemCategory { get; set; }
         public string? TradeItemProduct { get; set; }
         public string? ProgramArea { get; set; }
+        public string? ProductGS1Code { get; set; }
         public string? SubmitStatus { get; set; }
     }
 }

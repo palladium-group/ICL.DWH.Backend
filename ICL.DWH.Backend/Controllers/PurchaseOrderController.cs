@@ -64,6 +64,7 @@ namespace ICL.DWH.Backend.Controllers
                             product.TradeItemCategory = productDetail.trade_item_category;
                             product.TradeItemProduct = productDetail.trade_item_product;
                             product.ProgramArea = productDetail.program_area;
+                            product.ProductGS1Code = productDetail.trade_item_product_gs1;
                         }
                         catch { }
                     }
@@ -159,7 +160,7 @@ namespace ICL.DWH.Backend.Controllers
                             var errorString = JsonConvert.SerializeObject(responseContent);
 
                             po.ErrorMessage = errorString;
-                            po.Status = PurchaseOrderStatus.Failed;
+                            po.DeliveryStatus = PurchaseOrderStatus.Failed;
                             _purchaseOrderService.UpdatePurchaseOrder(po);
                         }
                         else
@@ -167,7 +168,7 @@ namespace ICL.DWH.Backend.Controllers
                             var transactionId = scmResponse.Transaction.TransactionId;
 
                             po.ErrorMessage = "";
-                            po.Status = PurchaseOrderStatus.Delivered;
+                            po.DeliveryStatus = PurchaseOrderStatus.Delivered;
                             po.SCMID = new Guid(transactionId);
                             _purchaseOrderService.UpdatePurchaseOrder(po);
                         }
