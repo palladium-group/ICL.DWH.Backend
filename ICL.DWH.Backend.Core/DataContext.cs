@@ -19,5 +19,7 @@ namespace ICL.DWH.Backend.Core
         }
 
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductDetail> productDetails { get; set; }
     }
 }

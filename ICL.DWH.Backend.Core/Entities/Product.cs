@@ -22,5 +22,10 @@ namespace ICL.DWH.Backend.Core.Entities
         public string? UnitRate { get; set; }
         public string? OrderDetails { get; set; }
         public string? SKULineNo { get; set; }
+        public string? TradeItemName { get; set; }
+        public string? TradeItemCategory { get; set; }
+        public string? TradeItemProduct { get; set; }
+        public string? ProgramArea { get; set; }
+        public string? SubmitStatus { get; set; }
     }
 }

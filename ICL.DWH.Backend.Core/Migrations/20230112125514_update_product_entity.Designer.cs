@@ -3,6 +3,7 @@ using System;
 using ICL.DWH.Backend.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ICL.DWH.Backend.Core.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230112125514_update_product_entity")]
+    partial class update_product_entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,41 +91,6 @@ namespace ICL.DWH.Backend.Core.Migrations
                     b.ToTable("ft_products");
                 });
 
-            modelBuilder.Entity("ICL.DWH.Backend.Core.Entities.ProductDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("program_area")
-                        .HasColumnType("text");
-
-                    b.Property<string>("submit_status")
-                        .HasColumnType("text");
-
-                    b.Property<string>("trade_item_category")
-                        .HasColumnType("text");
-
-                    b.Property<string>("trade_item_code")
-                        .HasColumnType("text");
-
-                    b.Property<int>("trade_item_id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("trade_item_name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("trade_item_product")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("dim_products");
-                });
-
             modelBuilder.Entity("ICL.DWH.Backend.Core.Entities.PurchaseOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -143,12 +110,6 @@ namespace ICL.DWH.Backend.Core.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ErrorMessage")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PlaceOfDelivery")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PlaceOfReceipt")
                         .HasColumnType("text");
 
                     b.Property<string>("ProcessType")

@@ -19,7 +19,8 @@ namespace ICL.DWH.Backend.Core.Services
 
         public IEnumerable<Product> GetProductsByPOUUID(Guid PoUuid)
         {
-            return _productRepository.GetAll().Where(x => x.PoUuid == PoUuid);
+            List<Product> products = _productRepository.GetAll().Where(x => x.PoUuid == PoUuid).ToList();
+            return products;
         }
 
         public IEnumerable<Product> SaveProducts(IEnumerable<Product> products)

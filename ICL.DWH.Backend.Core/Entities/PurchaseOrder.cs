@@ -19,6 +19,8 @@ namespace ICL.DWH.Backend.Core.Entities
         public PurchaseOrderStatus Status { get; set; }
         public string? ErrorMessage { get; set; }
         public string? ProcessType { get; set; }
+        public string? PlaceOfReceipt { get; set; }
+        public string? PlaceOfDelivery { get; set; }
         public List<Product>? products { get; set; }
     }
 

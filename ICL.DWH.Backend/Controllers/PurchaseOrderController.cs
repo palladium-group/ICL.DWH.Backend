@@ -21,12 +21,14 @@ namespace ICL.DWH.Backend.Controllers
     {
         private readonly IPurchaseOrderService _purchaseOrderService;
         private readonly IProductService _productService;
+        private readonly IProductDetailService _productDetailService;
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public PurchaseOrderController(IPurchaseOrderService purchaseOrderService, IProductService productService)
+        public PurchaseOrderController(IPurchaseOrderService purchaseOrderService, IProductService productService, IProductDetailService productDetailService)
         {
             _purchaseOrderService = purchaseOrderService;
             _productService = productService;
+            _productDetailService = productDetailService;
         }
 
         [HttpPost]
@@ -38,7 +40,7 @@ namespace ICL.DWH.Backend.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                throw e;
             }
         }
 
@@ -52,6 +54,20 @@ namespace ICL.DWH.Backend.Controllers
                 foreach(PurchaseOrder po in purchaseOrders)
                 {
                     var products = _productService.GetProductsByPOUUID(po.uuid);
+
+                    foreach (Product product in products)
+                    {
+                        try
+                        {
+                            ProductDetail productDetail = _productDetailService.GetProductDetailByProductCode(product.ProductCode);
+                            product.TradeItemName = productDetail.trade_item_name;
+                            product.TradeItemCategory = productDetail.trade_item_category;
+                            product.TradeItemProduct = productDetail.trade_item_product;
+                            product.ProgramArea = productDetail.program_area;
+                        }
+                        catch { }
+                    }
+
                     po.products = products.ToList();
                 }
 
