@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
+
 
 namespace ICL.DWH.Backend.Controllers
 {
@@ -86,7 +88,7 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("{bookingNo}")]
+        [HttpGet("pending-po/{bookingNo}")]
         public IActionResult ValidatePO(string bookingNo)
         {
             try
@@ -100,19 +102,14 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("{bookingNo}")]
+        [HttpGet("validated-po/{bookingNo}")]
         public async Task<IActionResult> PostOrderToSCM(string bookingNo)
         {
             try
             {
-                WebClient webClient = new WebClient();
-                webClient.QueryString.Add("bookingNo", bookingNo);
-                string result = webClient.DownloadString("https://localhost:7014/api/PurchaseOrder");
-
-                byte[] byteArray = Encoding.ASCII.GetBytes(result);
-                MemoryStream stream = new MemoryStream(byteArray);
-                XmlSerializer serial = new XmlSerializer(typeof(PurchaseOrder));
-                PurchaseOrder po = (PurchaseOrder)serial.Deserialize(stream);
+                PurchaseOrder po = _purchaseOrderService.GetPurchaseOrders().Where(x=>x.BookingNo==bookingNo).FirstOrDefault();
+                var products = _productService.GetProductsByPOUUID(po.uuid);
+                po.products = products.ToList();
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(po.AsnFile.ToString());
