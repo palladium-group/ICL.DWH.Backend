@@ -1,24 +1,7 @@
 ﻿using ICL.DWH.Backend.Core.Entities;
 using ICL.DWH.Backend.Core.Repository;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
-using System;
-using System.Globalization;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
-using System.Xml;
-using System.Xml.Serialization;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using ICL.DWH.Backend.Core.Utils;
 
 namespace ICL.DWH.Backend.Core.Services
@@ -117,11 +100,10 @@ namespace ICL.DWH.Backend.Core.Services
             }
         }
 
-        public string ValidatePurchaseOrder(string bookingId)
+        public string ValidatePurchaseOrder(PurchaseOrder purchaseOrder)
         {
             try
             {
-                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.Status == PurchaseOrderStatus.Pending).FirstOrDefault();
                 if (purchaseOrder != null)
                 {
                     if (purchaseOrder.BookingDate != null && purchaseOrder.BookingNo != null)
@@ -139,56 +121,6 @@ namespace ICL.DWH.Backend.Core.Services
                 }
             }
             catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        public async Task<string> PostToSCMAsync(string mySbMsg, string bookingNo)
-        {
-            try
-            {
-                //push message to scm-profit
-                var requestContent = new StringContent("grant_type=password&username=fitexpress&password=FitExpress@2021");
-                var response = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/token", requestContent);
-                var responseBody = await response.Content.ReadAsAsync<SCMResponse>();
-                var token = responseBody.access_token;
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                var bookingRequestContent = new StringContent(mySbMsg);
-                var bookingResponse = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/api/v1/Booking/ProcessBooking", bookingRequestContent);
-                var responseContent = await bookingResponse.Content.ReadAsStringAsync();
-
-                if (bookingResponse.IsSuccessStatusCode)
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(ArrayOfTransaction));
-                    using (StringReader reader = new StringReader(responseContent))
-                    {
-                        var scmResponse = (ArrayOfTransaction)serializer.Deserialize(reader);
-                        PurchaseOrder po = (PurchaseOrder)FindByBoookingNo(bookingNo);
-
-                        if (scmResponse.Transaction.Status == "Fail")
-                        {
-                            var errorString = JsonConvert.SerializeObject(responseContent);
-
-                            po.ErrorMessage = errorString;
-                            po.Status = PurchaseOrderStatus.Failed;
-                            UpdatePurchaseOrder(po);
-                        }
-                        else
-                        {
-                            var transactionId = scmResponse.Transaction.TransactionId;
-
-                            po.ErrorMessage = "";
-                            po.Status = PurchaseOrderStatus.Delivered;
-                            po.SCMID = new Guid(transactionId);
-                            UpdatePurchaseOrder(po);
-                        }
-                    }
-                }
-
-                return "Submitted";
-            }
-            catch(Exception e)
             {
                 throw e;
             }

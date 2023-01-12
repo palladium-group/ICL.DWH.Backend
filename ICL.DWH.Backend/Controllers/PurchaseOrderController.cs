@@ -9,6 +9,8 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
+using ICL.DWH.Backend.Core.Utils;
 
 
 namespace ICL.DWH.Backend.Controllers
@@ -19,6 +21,7 @@ namespace ICL.DWH.Backend.Controllers
     {
         private readonly IPurchaseOrderService _purchaseOrderService;
         private readonly IProductService _productService;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         public PurchaseOrderController(IPurchaseOrderService purchaseOrderService, IProductService productService)
         {
@@ -93,7 +96,11 @@ namespace ICL.DWH.Backend.Controllers
         {
             try
             {
-                var response = _purchaseOrderService.ValidatePurchaseOrder(bookingNo);
+                PurchaseOrder po = _purchaseOrderService.GetPurchaseOrders().ToList().FirstOrDefault();
+                var products = _productService.GetProductsByPOUUID(po.uuid);
+                po.products = products.ToList();
+
+                var response = _purchaseOrderService.ValidatePurchaseOrder(po);
                 return Ok(new { message = response });
             }
             catch (Exception)
@@ -113,30 +120,45 @@ namespace ICL.DWH.Backend.Controllers
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(po.AsnFile.ToString());
-                _purchaseOrderService.PostToSCMAsync(po.AsnFile, po.BookingNo);
+                //_purchaseOrderService.PostToSCMAsync(po.AsnFile, po.BookingNo);
 
-                /*
-                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
-                ServiceBusSender sender = client.CreateSender("asn");
+                var requestContent = new StringContent("grant_type=password&username=fitexpress&password=FitExpress@2021");
+                var response = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/token", requestContent);
+                var responseBody = await response.Content.ReadAsAsync<SCMResponse>();
+                var token = responseBody.access_token;
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var bookingRequestContent = new StringContent(po.AsnFile);
+                var bookingResponse = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/api/v1/Booking/ProcessBooking", bookingRequestContent);
+                var responseContent = await bookingResponse.Content.ReadAsStringAsync();
 
-                using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
+                if (bookingResponse.IsSuccessStatusCode)
                 {
-                    message.TryAddMessage(new ServiceBusMessage(xmlDoc.ToString()));
-                    try
+                    XmlSerializer serializer = new XmlSerializer(typeof(ArrayOfTransaction));
+                    using (StringReader reader = new StringReader(responseContent))
                     {
-                        await sender.SendMessagesAsync(message);
-                    }
-                    finally
-                    {
-                        await sender.DisposeAsync();
-                        await client.DisposeAsync();
+                        var scmResponse = (ArrayOfTransaction)serializer.Deserialize(reader);
+
+                        if (scmResponse.Transaction.Status == "Fail")
+                        {
+                            var errorString = JsonConvert.SerializeObject(responseContent);
+
+                            po.ErrorMessage = errorString;
+                            po.Status = PurchaseOrderStatus.Failed;
+                            _purchaseOrderService.UpdatePurchaseOrder(po);
+                        }
+                        else
+                        {
+                            var transactionId = scmResponse.Transaction.TransactionId;
+
+                            po.ErrorMessage = "";
+                            po.Status = PurchaseOrderStatus.Delivered;
+                            po.SCMID = new Guid(transactionId);
+                            _purchaseOrderService.UpdatePurchaseOrder(po);
+                        }
                     }
                 }
-                */
 
-
-
-                return Ok(new { message = "Successfully sent ASN" });
+                return Ok(new { message = "Successful" });
             }
             catch (Exception e)
             {
