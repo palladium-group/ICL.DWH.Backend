@@ -88,7 +88,7 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("pending-po/{bookingNo}")]
+        [HttpGet("validate/{bookingNo}")]
         public IActionResult ValidatePO(string bookingNo)
         {
             try
@@ -102,7 +102,7 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("validated-po/{bookingNo}")]
+        [HttpGet("post/{bookingNo}")]
         public async Task<IActionResult> PostOrderToSCM(string bookingNo)
         {
             try
@@ -113,7 +113,9 @@ namespace ICL.DWH.Backend.Controllers
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(po.AsnFile.ToString());
+                _purchaseOrderService.PostToSCMAsync(po.AsnFile, po.BookingNo);
 
+                /*
                 ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
                 ServiceBusSender sender = client.CreateSender("asn");
 
@@ -130,6 +132,9 @@ namespace ICL.DWH.Backend.Controllers
                         await client.DisposeAsync();
                     }
                 }
+                */
+
+
 
                 return Ok(new { message = "Successfully sent ASN" });
             }

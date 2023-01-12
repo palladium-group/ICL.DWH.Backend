@@ -14,5 +14,6 @@ namespace ICL.DWH.Backend.Core.Services
         void UpdatePurchaseOrderByScmId(string bookingId, Guid scmId);
         void UpdatePurchaseOrderAsFailed(string bookingId, string errorMessage);
         string ValidatePurchaseOrder(string bookingId);
+        Task<string> PostToSCMAsync(string mySbMsg, string bookingNo);
     }
 }
