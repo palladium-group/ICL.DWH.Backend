@@ -175,6 +175,25 @@ namespace ICL.DWH.Backend.Controllers
                     }
                 }
 
+                //-------------------------------------
+                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
+                ServiceBusSender sender = client.CreateSender("asn");
+
+                using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
+                {
+                    message.TryAddMessage(new ServiceBusMessage(po.AsnFile.ToString()));
+                    try
+                    {
+                        await sender.SendMessagesAsync(message);
+                    }
+                    finally
+                    {
+                        await sender.DisposeAsync();
+                        await client.DisposeAsync();
+                    }
+                }
+                //-------------------------------------
+
                 return Ok(new { message = "Successful" });
             }
             catch (Exception e)
