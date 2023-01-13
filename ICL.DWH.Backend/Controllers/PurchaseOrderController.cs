@@ -11,7 +11,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 using ICL.DWH.Backend.Core.Utils;
-
+using ICL.DWH.Backend.Core;
 
 namespace ICL.DWH.Backend.Controllers
 {
@@ -22,13 +22,15 @@ namespace ICL.DWH.Backend.Controllers
         private readonly IPurchaseOrderService _purchaseOrderService;
         private readonly IProductService _productService;
         private readonly IProductDetailService _productDetailService;
+        private readonly DataContext _dataContext;
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public PurchaseOrderController(IPurchaseOrderService purchaseOrderService, IProductService productService, IProductDetailService productDetailService)
+        public PurchaseOrderController(IPurchaseOrderService purchaseOrderService, IProductService productService, IProductDetailService productDetailService, DataContext dataContext)
         {
             _purchaseOrderService = purchaseOrderService;
             _productService = productService;
             _productDetailService = productDetailService;
+            _dataContext = dataContext;
         }
 
         [HttpPost]
@@ -135,10 +137,6 @@ namespace ICL.DWH.Backend.Controllers
                 var products = _productService.GetProductsByPOUUID(po.uuid);
                 po.products = products.ToList();
 
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(po.AsnFile.ToString());
-                //_purchaseOrderService.PostToSCMAsync(po.AsnFile, po.BookingNo);
-
                 var requestContent = new StringContent("grant_type=password&username=fitexpress&password=FitExpress@2021");
                 var response = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/token", requestContent);
                 var responseBody = await response.Content.ReadAsAsync<SCMResponse>();
@@ -161,6 +159,7 @@ namespace ICL.DWH.Backend.Controllers
 
                             po.ErrorMessage = errorString;
                             po.DeliveryStatus = PurchaseOrderStatus.Failed;
+                            po.SubmitStatus = "Submitted";
                             _purchaseOrderService.UpdatePurchaseOrder(po);
                         }
                         else
@@ -170,6 +169,7 @@ namespace ICL.DWH.Backend.Controllers
                             po.ErrorMessage = "";
                             po.DeliveryStatus = PurchaseOrderStatus.Delivered;
                             po.SCMID = new Guid(transactionId);
+                            po.SubmitStatus = "Submitted";
                             _purchaseOrderService.UpdatePurchaseOrder(po);
                         }
                     }
@@ -180,6 +180,55 @@ namespace ICL.DWH.Backend.Controllers
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        [HttpGet("middlewarepost/{bookingNo}")]
+        public async Task<IActionResult> PostOrderToMiddleWare(string bookingNo)
+        {
+            try
+            {
+                PurchaseOrder po = _purchaseOrderService.GetPurchaseOrders().Where(x => x.BookingNo == bookingNo).FirstOrDefault();
+                var products = _productService.GetProductsByPOUUID(po.uuid);
+                po.products = products.ToList();
+                po.SubmitStatus = "Submitted";
+                _purchaseOrderService.UpdatePurchaseOrder(po);
+
+                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
+                ServiceBusSender sender = client.CreateSender("asn");
+
+                using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
+                {
+                    message.TryAddMessage(new ServiceBusMessage(po.AsnFile.ToString()));
+                    try
+                    {
+                        await sender.SendMessagesAsync(message);
+                    }
+                    finally
+                    {
+                        await sender.DisposeAsync();
+                        await client.DisposeAsync();
+                    }
+                }
+
+                return Ok(new { message = "Successfully sent ASN" });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        [HttpGet("statistics")]
+        public IActionResult GetMiddlewareStatistics()
+        {
+            try
+            {
+                return Ok(_dataContext.Statistics.ToList());
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }
