@@ -18,6 +18,18 @@ namespace ICL.DWH.Backend.Core
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder
+               .Entity<Statistic>()
+               .ToView("statistics")
+               .HasKey(t => t.createdate);
+        }
+
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductDetail> productDetails { get; set; }
+        public DbSet<Statistic> Statistics { get; set; } 
     }
 }
