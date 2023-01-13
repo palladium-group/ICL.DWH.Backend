@@ -1,16 +1,15 @@
 ﻿using ICL.DWH.Backend.Core.Entities;
 using ICL.DWH.Backend.Core.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Xml.Serialization;
+using ICL.DWH.Backend.Core.Utils;
 
 namespace ICL.DWH.Backend.Core.Services
 {
     public class PurchaseOrderService : IPurchaseOrderService
     {
         private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         public PurchaseOrderService(IPurchaseOrderRepository purchaseOrderRepository)
         {
@@ -40,14 +39,39 @@ namespace ICL.DWH.Backend.Core.Services
             }
         }
 
+        public PurchaseOrder UpdatePurchaseOrder(PurchaseOrder purchaseOrder)
+        {
+            try
+            {
+                return _purchaseOrderRepository.Update(purchaseOrder);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public PurchaseOrder FindByBoookingNo(string BookingNo)
+        {
+            try
+            {
+                var result = _purchaseOrderRepository.GetAll(x => x.BookingNo == BookingNo).FirstOrDefault();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public void UpdatePurchaseOrderAsFailed(string bookingId, string errorMessage)
         {
             try
             {
-                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.Status == PurchaseOrderStatus.Pending).FirstOrDefault();
+                var purchaseOrder = _purchaseOrderRepository.GetAll(x => x.BookingNo == bookingId && x.DeliveryStatus == PurchaseOrderStatus.Pending).FirstOrDefault();
                 if (purchaseOrder != null)
                 {
-                    purchaseOrder.Status = PurchaseOrderStatus.Failed;
+                    purchaseOrder.DeliveryStatus = PurchaseOrderStatus.Failed;
                     purchaseOrder.ErrorMessage = errorMessage;
                     _purchaseOrderRepository.Update(purchaseOrder);
                 }
@@ -66,8 +90,34 @@ namespace ICL.DWH.Backend.Core.Services
                 if (purchaseOrder != null)
                 {
                     purchaseOrder.SCMID = scmId;
-                    purchaseOrder.Status = PurchaseOrderStatus.Delivered;
+                    purchaseOrder.DeliveryStatus = PurchaseOrderStatus.Delivered;
                     _purchaseOrderRepository.Update(purchaseOrder);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public string ValidatePurchaseOrder(PurchaseOrder purchaseOrder)
+        {
+            try
+            {
+                if (purchaseOrder != null)
+                {
+                    if (purchaseOrder.BookingDate != null && purchaseOrder.BookingNo != null)
+                    {
+                        return "valid";
+                    }
+                    else
+                    {
+                        return "not valid";
+                    }
+                }
+                else
+                {
+                    return "not valid";
                 }
             }
             catch (Exception e)
