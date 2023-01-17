@@ -62,11 +62,14 @@ namespace ICL.DWH.Backend.Controllers
                         try
                         {
                             ProductDetail productDetail = _productDetailService.GetProductDetailByProductCode(product.ProductCode);
-                            product.TradeItemName = productDetail.trade_item_name;
-                            product.TradeItemCategory = productDetail.trade_item_category;
-                            product.TradeItemProduct = productDetail.trade_item_product;
-                            product.ProgramArea = productDetail.program_area;
-                            product.ProductGS1Code = productDetail.trade_item_product_gs1;
+                            if (productDetail != null)
+                            {
+                                product.TradeItemName = productDetail.trade_item_name;
+                                product.TradeItemCategory = productDetail.trade_item_category;
+                                product.TradeItemProduct = productDetail.trade_item_product;
+                                product.ProgramArea = productDetail.program_area;
+                                product.ProductGS1Code = productDetail.trade_item_product_gs1;
+                            }
                         }
                         catch { }
                     }
