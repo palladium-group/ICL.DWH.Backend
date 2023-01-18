@@ -52,7 +52,7 @@ namespace ICL.DWH.Backend.Controllers
         {
             try
             {
-                return Ok(GetPurchaseOrders().Where(x=>x.ProcessType=="Inbound"));
+                return Ok(GetPurchaseOrders().Where(x=>x.ProcessType=="Inbound").OrderByDescending(y => y.CreateDate));
             }
             catch (Exception e)
             {
@@ -81,9 +81,9 @@ namespace ICL.DWH.Backend.Controllers
             {
                 if ((PurchaseOrderStatus)validated == PurchaseOrderStatus.Delivered)
                 {
-                    return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound" && x.DeliveryStatus == PurchaseOrderStatus.Delivered));
+                    return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound" && x.DeliveryStatus == PurchaseOrderStatus.Delivered).OrderByDescending(y => y.CreateDate));
                 }
-                return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound" && x.DeliveryStatus != PurchaseOrderStatus.Delivered));
+                return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound" && x.DeliveryStatus != PurchaseOrderStatus.Delivered).OrderByDescending(y => y.CreateDate));
             }
             catch (Exception e)
             {
