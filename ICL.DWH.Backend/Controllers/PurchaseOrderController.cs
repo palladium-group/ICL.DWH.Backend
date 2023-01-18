@@ -132,12 +132,18 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("UpdatePurchaseOrderAsFailed/{bookingNo}")]
-        public IActionResult UpdatePurchaseOrderAsFailed(string bookingNo, [FromBody] ErrorMessage errorMessage)
+        [HttpPost("UpdatePurchaseOrderStatus")]
+        public IActionResult UpdatePurchaseOrderAsFailed(MiddlewareResponse response)
         {
             try
             {
-                _purchaseOrderService.UpdatePurchaseOrderAsFailed(bookingNo, errorMessage.Message);
+                PurchaseOrder po = _purchaseOrderService.GetPurchaseOrders()
+                    .Where(x => x.BookingNo == response.BookingNo).FirstOrDefault();
+
+                po.ErrorMessage = response.ErrorString;
+                po.DeliveryStatus = response.DeliveryStatus == "Failed" ? PurchaseOrderStatus.Failed : PurchaseOrderStatus.Delivered;
+                po.SCMID = response.SCMID;
+                _purchaseOrderService.UpdatePurchaseOrder(po);
                 return Ok(new { message = "Updated successfully" });
             }
             catch (Exception)
@@ -165,87 +171,6 @@ namespace ICL.DWH.Backend.Controllers
         }
 
         [HttpGet("post/{bookingNo}")]
-        public async Task<IActionResult> PostOrderToSCM(string bookingNo)
-        {
-            try
-            {
-                Task.Run(() => {
-                    PostPOToSCMAsync(bookingNo);
-                });
-
-                return Ok(new { message = "PO Submitted for upload" });
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
-            }
-        }
-
-        private async Task PostPOToSCMAsync(string bookingNo)
-        {
-            PurchaseOrder po = _purchaseOrderService.GetPurchaseOrders().Where(x => x.BookingNo == bookingNo).FirstOrDefault();
-            var products = _productService.GetProductsByPOUUID(po.uuid);
-            po.products = products.ToList();
-
-            var requestContent = new StringContent("grant_type=password&username=fitexpress&password=FitExpress@2021");
-            var response = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/token", requestContent);
-            var responseBody = await response.Content.ReadAsAsync<SCMResponse>();
-            var token = responseBody.access_token;
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var bookingRequestContent = new StringContent(po.AsnFile);
-            var bookingResponse = await _httpClient.PostAsync("http://fitnewuat.hht.freightintime.com/api/v1/Booking/ProcessBooking", bookingRequestContent);
-            var responseContent = await bookingResponse.Content.ReadAsStringAsync();
-
-            if (bookingResponse.IsSuccessStatusCode)
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(ArrayOfTransaction));
-                using (StringReader reader = new StringReader(responseContent))
-                {
-                    var scmResponse = (ArrayOfTransaction)serializer.Deserialize(reader);
-
-                    if (scmResponse.Transaction.Status == "Fail")
-                    {
-                        var errorString = JsonConvert.SerializeObject(responseContent);
-
-                        po.ErrorMessage = errorString;
-                        po.DeliveryStatus = PurchaseOrderStatus.Failed;
-                        po.SubmitStatus = "Submitted";
-                        _purchaseOrderService.UpdatePurchaseOrder(po);
-                    }
-                    else
-                    {
-                        var transactionId = scmResponse.Transaction.TransactionId;
-
-                        po.ErrorMessage = "";
-                        po.DeliveryStatus = PurchaseOrderStatus.Delivered;
-                        po.SCMID = new Guid(transactionId);
-                        po.SubmitStatus = "Submitted";
-                        _purchaseOrderService.UpdatePurchaseOrder(po);
-                    }
-                }
-            }
-
-            //-------------------------------------
-            ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
-            ServiceBusSender sender = client.CreateSender("asn");
-
-            using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
-            {
-                message.TryAddMessage(new ServiceBusMessage(po.AsnFile.ToString()));
-                try
-                {
-                    await sender.SendMessagesAsync(message);
-                }
-                finally
-                {
-                    await sender.DisposeAsync();
-                    await client.DisposeAsync();
-                }
-            }
-            //-------------------------------------
-        }
-
-        [HttpGet("middlewarepost/{bookingNo}")]
         public async Task<IActionResult> PostOrderToMiddleWare(string bookingNo)
         {
             try
