@@ -74,12 +74,16 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("outbound")]
-        public IActionResult GetOutboundPurchaseOrders()
+        [HttpGet("outbound/{validated}")]
+        public IActionResult GetOutboundPurchaseOrders(int validated)
         {
             try
             {
-                return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound"));
+                if ((PurchaseOrderStatus)validated == PurchaseOrderStatus.Delivered)
+                {
+                    return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound" && x.DeliveryStatus == PurchaseOrderStatus.Delivered));
+                }
+                return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Outbound" && x.DeliveryStatus != PurchaseOrderStatus.Delivered));
             }
             catch (Exception e)
             {
