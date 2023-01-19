@@ -47,12 +47,16 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("inbound")]
-        public IActionResult GetInboundPurchaseOrders()
+        [HttpGet("inbound/{validated}")]
+        public IActionResult GetInboundPurchaseOrders(int validated)
         {
             try
             {
-                return Ok(GetPurchaseOrders().Where(x=>x.ProcessType=="Inbound").OrderByDescending(y => y.CreateDate));
+                if ((PurchaseOrderStatus)validated == PurchaseOrderStatus.Delivered)
+                {
+                    return Ok(GetPurchaseOrders().Where(x => x.ProcessType == "Inbound" && x.DeliveryStatus == PurchaseOrderStatus.Delivered).OrderByDescending(y => y.CreateDate));
+                }
+                return Ok(GetPurchaseOrders().Where(x=>x.ProcessType=="Inbound" && x.DeliveryStatus != PurchaseOrderStatus.Delivered).OrderByDescending(y => y.CreateDate));
             }
             catch (Exception e)
             {
