@@ -219,8 +219,7 @@ namespace ICL.DWH.Backend.Controllers
         {
             try
             {
-                return Ok(_dataContext.Statistics.Where(x => x.processtype != null).ToList()
-                    .Where(x => x.processtype.ToLower()==processtype.ToLower()));
+                return Ok(_dataContext.Statistics.Where(x => x.processtype.ToLower() == processtype.ToLower()));
             }
             catch (Exception e)
             {
