@@ -3,6 +3,7 @@ using System;
 using ICL.DWH.Backend.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ICL.DWH.Backend.Core.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230119142805_seed_data")]
+    partial class seed_data
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -248,25 +250,6 @@ namespace ICL.DWH.Backend.Core.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("icl_users");
-                });
-
-            modelBuilder.Entity("ICL.DWH.Backend.Core.Entities.Statistic", b =>
-                {
-                    b.Property<DateTime>("createdate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("delivered")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("failed")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("pending")
-                        .HasColumnType("integer");
-
-                    b.HasKey("createdate");
-
-                    b.ToView("statistics");
                 });
 
             modelBuilder.Entity("ICL.DWH.Backend.Core.Entities.Product", b =>
