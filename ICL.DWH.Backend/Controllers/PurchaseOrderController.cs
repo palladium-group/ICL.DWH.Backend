@@ -214,12 +214,13 @@ namespace ICL.DWH.Backend.Controllers
             }
         }
 
-        [HttpGet("statistics")]
-        public IActionResult GetMiddlewareStatistics()
+        [HttpGet("statistics/{processtype}")]
+        public IActionResult GetMiddlewareStatistics(string processtype)
         {
             try
             {
-                return Ok(_dataContext.Statistics.ToList());
+                return Ok(_dataContext.Statistics.Where(x => x.processtype != null).ToList()
+                    .Where(x => x.processtype.ToLower()==processtype.ToLower()));
             }
             catch (Exception e)
             {
