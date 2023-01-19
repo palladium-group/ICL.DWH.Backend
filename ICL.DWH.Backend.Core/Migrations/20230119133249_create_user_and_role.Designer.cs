@@ -3,6 +3,7 @@ using System;
 using ICL.DWH.Backend.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ICL.DWH.Backend.Core.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230119133249_create_user_and_role")]
+    partial class create_user_and_role
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,26 +191,6 @@ namespace ICL.DWH.Backend.Core.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("26bff42a-c785-47e9-808f-f3a402ac6ee8"),
-                            CreateDate = new DateTime(2023, 1, 19, 17, 28, 5, 212, DateTimeKind.Local).AddTicks(2672),
-                            RoleName = "HQ.User"
-                        },
-                        new
-                        {
-                            Id = new Guid("64dbfc18-5508-4af5-aecd-e98cd731fd15"),
-                            CreateDate = new DateTime(2023, 1, 19, 17, 28, 5, 212, DateTimeKind.Local).AddTicks(2693),
-                            RoleName = "Country.User"
-                        },
-                        new
-                        {
-                            Id = new Guid("44b8bcf1-f444-4eb0-958e-64c77f24e5c7"),
-                            CreateDate = new DateTime(2023, 1, 19, 17, 28, 5, 212, DateTimeKind.Local).AddTicks(2697),
-                            RoleName = "Washington.User"
-                        });
                 });
 
             modelBuilder.Entity("ICL.DWH.Backend.Core.Entities.Statistic", b =>
