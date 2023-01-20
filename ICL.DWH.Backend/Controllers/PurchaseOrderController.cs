@@ -188,7 +188,7 @@ namespace ICL.DWH.Backend.Controllers
                 po.SubmitStatus = "Submitted";
                 _purchaseOrderService.UpdatePurchaseOrder(po);
 
-                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://uat-ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=x1cAioe7TniSKAan8alKV5q+7f/CpgFXgosWZta1hJg=");
+                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
                 ServiceBusSender sender = client.CreateSender("asn");
 
                 using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
