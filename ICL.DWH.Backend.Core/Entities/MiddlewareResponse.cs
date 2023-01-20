@@ -11,6 +11,6 @@ namespace ICL.DWH.Backend.Core.Entities
         public string? BookingNo { get; set; }
         public string? ErrorString { get; set; }
         public string? DeliveryStatus { get; set; }
-        public Guid SCMID { get; set; }
+        public Guid? SCMID { get; set; }
     }
 }
