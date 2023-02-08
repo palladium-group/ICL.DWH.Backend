@@ -29,6 +29,13 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
+builder.Services.AddScoped<ICMSContentImpactRepository, CMSContentImpactRepository>();
+builder.Services.AddScoped<ICMSContentImpactService, CMSContentImpactService>();
+builder.Services.AddScoped<ICMSContentLeadershipRepository, CMSContentLeadershipRepository>();
+builder.Services.AddScoped<ICMSContentLeadershipService, CMSContentLeadershipService>();
+builder.Services.AddScoped<ICMSContentRolesRepository, CMSContentRolesRepository>();
+builder.Services.AddScoped<ICMSContentRolesService, CMSContentRolesService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -46,6 +46,7 @@ namespace ICL.DWH.Backend.Core
                     CreateDate = DateTime.Now,
                 }
             );
+            modelBuilder.Entity<CMSContentRoles_dataQ>().HasNoKey();
         }
 
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
@@ -54,5 +55,9 @@ namespace ICL.DWH.Backend.Core
         public DbSet<Statistic> Statistics { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<CMSContentImpact> CMSContentImpact { get; set; }
+        public DbSet<CMSContentLeadership> CMSContentLeadership { get; set; }
+        public DbSet<CMSContentRoles> CMSContentRoles { get; set; }
+        public DbSet<CMSContentRoles_dataQ> CMSContentRoles_dataQ { get; set; }
     }
 }
