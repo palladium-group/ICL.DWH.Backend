@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 using Newtonsoft.Json;
 using ICL.DWH.Backend.Core.Utils;
 using ICL.DWH.Backend.Core;
+using Microsoft.Extensions.Logging;
 
 namespace ICL.DWH.Backend.Controllers
 {
@@ -25,12 +26,14 @@ namespace ICL.DWH.Backend.Controllers
         private readonly DataContext _dataContext;
         private readonly IConfiguration _configuration;
         private static readonly HttpClient _httpClient = new HttpClient();
+        private readonly ILogger<PurchaseOrderController> _logger;
 
         public PurchaseOrderController(
             IPurchaseOrderService purchaseOrderService,
             IConfiguration configuration,
             IProductService productService, 
             IProductDetailService productDetailService, 
+            ILogger<PurchaseOrderController> logger,
             DataContext dataContext)
         {
             _purchaseOrderService = purchaseOrderService;
@@ -38,6 +41,7 @@ namespace ICL.DWH.Backend.Controllers
             _productDetailService = productDetailService;
             _dataContext = dataContext;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpPost("inbound")]
@@ -195,6 +199,7 @@ namespace ICL.DWH.Backend.Controllers
                 po.SubmitStatus = "Submitted";
                 _purchaseOrderService.UpdatePurchaseOrder(po);
                 var connectionString = _configuration.GetConnectionString("ServiceBus");
+                _logger.LogInformation(connectionString);
                 ServiceBusClient client = new ServiceBusClient(connectionString);
                 ServiceBusSender sender = client.CreateSender("asn");
 
