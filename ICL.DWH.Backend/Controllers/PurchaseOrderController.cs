@@ -23,14 +23,21 @@ namespace ICL.DWH.Backend.Controllers
         private readonly IProductService _productService;
         private readonly IProductDetailService _productDetailService;
         private readonly DataContext _dataContext;
+        private readonly IConfiguration _configuration;
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public PurchaseOrderController(IPurchaseOrderService purchaseOrderService, IProductService productService, IProductDetailService productDetailService, DataContext dataContext)
+        public PurchaseOrderController(
+            IPurchaseOrderService purchaseOrderService,
+            IConfiguration configuration,
+            IProductService productService, 
+            IProductDetailService productDetailService, 
+            DataContext dataContext)
         {
             _purchaseOrderService = purchaseOrderService;
             _productService = productService;
             _productDetailService = productDetailService;
             _dataContext = dataContext;
+            _configuration = configuration;
         }
 
         [HttpPost("inbound")]
@@ -187,8 +194,8 @@ namespace ICL.DWH.Backend.Controllers
                 po.products = products.ToList();
                 po.SubmitStatus = "Submitted";
                 _purchaseOrderService.UpdatePurchaseOrder(po);
-
-                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
+                var connectionString = _configuration.GetConnectionString("ServiceBus");
+                ServiceBusClient client = new ServiceBusClient(connectionString);
                 ServiceBusSender sender = client.CreateSender("asn");
 
                 using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
