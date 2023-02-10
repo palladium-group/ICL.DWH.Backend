@@ -11,8 +11,8 @@ namespace ICL.DWH.Backend.Core.Repository
 {
     public class Repository<T> : IRepository<T> where T : Entity
     {
-        private readonly DataContext _dataContext;
-        private readonly DbSet<T> DbSet;
+        protected readonly DataContext _dataContext;
+        protected readonly DbSet<T> DbSet;
 
         public Repository(DataContext dataContext)
         {
