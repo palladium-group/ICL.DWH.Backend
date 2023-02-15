@@ -22,6 +22,7 @@ namespace ICL.DWH.Backend.Core.Entities
         public string? PlaceOfReceipt { get; set; }
         public string? PlaceOfDelivery { get; set; }
         public string? SubmitStatus { get; set; }
+        public string? TransportationMode { get; set; }
         public List<Product>? products { get; set; }
     }
 

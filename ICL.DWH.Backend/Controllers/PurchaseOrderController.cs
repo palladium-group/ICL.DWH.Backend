@@ -198,17 +198,19 @@ namespace ICL.DWH.Backend.Controllers
                 po.products = products.ToList();
                 po.SubmitStatus = "Submitted";
                 _purchaseOrderService.UpdatePurchaseOrder(po);
-                var connectionString = _configuration.GetConnectionString("ServiceBus");
-                _logger.LogInformation(connectionString);
+                _logger.LogInformation("Initialize ServiceBus");
                 ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
                 ServiceBusSender sender = client.CreateSender("asn");
 
                 using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
                 {
+                    _logger.LogInformation("Add Message To ServiceBusMessage");
                     message.TryAddMessage(new ServiceBusMessage(po.AsnFile.ToString()));
                     try
                     {
+                        _logger.LogInformation("Send Message to ServiceBus");
                         await sender.SendMessagesAsync(message);
+                        _logger.LogInformation("Message Sent to ServiceBus");
                     }
                     finally
                     {
