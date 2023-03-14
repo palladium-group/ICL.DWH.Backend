@@ -27,6 +27,7 @@ namespace ICL.DWH.Backend.Controllers
         private readonly IConfiguration _configuration;
         private static readonly HttpClient _httpClient = new HttpClient();
         private readonly ILogger<PurchaseOrderController> _logger;
+        private readonly string _connectionString;
 
         public PurchaseOrderController(
             IPurchaseOrderService purchaseOrderService,
@@ -42,6 +43,8 @@ namespace ICL.DWH.Backend.Controllers
             _dataContext = dataContext;
             _configuration = configuration;
             _logger = logger;
+
+            _connectionString = _configuration.GetConnectionString("ServiceBus");
         }
 
         [HttpPost("inbound")]
@@ -199,7 +202,8 @@ namespace ICL.DWH.Backend.Controllers
                 po.SubmitStatus = "Submitted";
                 _purchaseOrderService.UpdatePurchaseOrder(po);
                 _logger.LogInformation("Initialize ServiceBus");
-                ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
+                //ServiceBusClient client = new ServiceBusClient("Endpoint=sb://ghsc-icl.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=T6Rv/GTQAb2p+UYm/yJL92EIvfQ4OcfRy3kY9xV+5/E=");
+                ServiceBusClient client = new ServiceBusClient(_connectionString);
                 ServiceBusSender sender = client.CreateSender("asn");
 
                 using (ServiceBusMessageBatch message = await sender.CreateMessageBatchAsync())
